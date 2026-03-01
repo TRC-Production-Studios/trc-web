@@ -1,0 +1,26 @@
+=====================================================
+  TRC PRODUCTION STUDIOS – Intro Video Setup
+=====================================================
+
+Place your intro video file(s) in this folder:
+
+  Required filename:  intro.mp4
+  Optional fallback:  intro.webm  (better compression, some browsers)
+
+Video requirements:
+  - Format:     MP4 (H.264) + optionally WebM (VP9)
+  - Duration:   Recommended 5–20 seconds
+  - Resolution: 1920×1080 (16:9) recommended
+  - Audio:      Can include audio (video starts muted by default
+                to comply with browser autoplay policies)
+  - No title cards needed – the site fades in after the video ends
+
+The video will:
+  ✓ Play automatically on first-ever visit (localStorage based)
+  ✓ Have NO controls, NO pause button, NO progress bar
+  ✓ Cover the full screen (object-fit: cover)
+  ✓ Dismiss automatically when it ends
+  ✓ Have a "SKIP ›" button in the bottom-right corner
+  ✓ Show a branded fallback animation if no video file is present
+
+If no video file is found, a branded logo splash runs for 4 seconds.

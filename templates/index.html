@@ -1,0 +1,1096 @@
+{% extends "base.html" %}
+
+{% block title %}TRC Production Studios – Inspiration. Innovation. Production.{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ── HERO ── */
+    .hero-wrapper {
+        position: relative;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .hero {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        /* NO overflow:hidden here – that's what trapped the scroll indicator */
+        padding: calc(var(--nav-height) + 4rem) 1.5rem 7rem;
+        min-height: 100vh;
+    }
+
+    .hero-bg {
+        position: absolute;
+        inset: 0;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse 80% 60% at 50% 40%, rgba(0,255,136,0.06) 0%, transparent 60%),
+            radial-gradient(ellipse 40% 30% at 80% 20%, rgba(0,229,200,0.05) 0%, transparent 50%);
+        pointer-events: none;
+    }
+
+    /* ── AURORA LAYERS ── */
+    .hero-aurora { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+    .aurora-layer {
+        position: absolute;
+        width: 200%; height: 200%;
+        top: -50%; left: -50%;
+        border-radius: 40%;
+        opacity: 0;
+    }
+    .aurora-layer-1 {
+        background: radial-gradient(ellipse 60% 40% at 40% 60%, rgba(0,255,136,0.055) 0%, transparent 65%);
+        animation: auroraFadeIn 1s ease 0.1s forwards, auroraRotate1 22s ease-in-out 1s infinite;
+    }
+    .aurora-layer-2 {
+        background: radial-gradient(ellipse 50% 35% at 65% 35%, rgba(0,229,200,0.04) 0%, transparent 65%);
+        animation: auroraFadeIn 1s ease 0.25s forwards, auroraRotate2 28s ease-in-out 1.25s infinite;
+    }
+    .aurora-layer-3 {
+        background: radial-gradient(ellipse 55% 30% at 30% 70%, rgba(0,200,83,0.035) 0%, transparent 65%);
+        animation: auroraFadeIn 1s ease 0.4s forwards, auroraRotate3 18s ease-in-out 1.4s infinite;
+    }
+    @keyframes auroraFadeIn { from { opacity:0; } to { opacity:1; } }
+    @keyframes auroraRotate1 {
+        0%,100% { transform: rotate(0deg) scale(1) translate(0,0); }
+        33%  { transform: rotate(8deg) scale(1.08) translate(2%,-3%); }
+        66%  { transform: rotate(-5deg) scale(0.95) translate(-3%,4%); }
+    }
+    @keyframes auroraRotate2 {
+        0%,100% { transform: rotate(0deg) scale(1) translate(0,0); }
+        40%  { transform: rotate(-10deg) scale(1.12) translate(-4%,2%); }
+        70%  { transform: rotate(6deg) scale(0.92) translate(3%,-5%); }
+    }
+    @keyframes auroraRotate3 {
+        0%,100% { transform: rotate(0deg) scale(1) translate(0,0); }
+        25%  { transform: rotate(12deg) scale(1.06) translate(4%,3%); }
+        75%  { transform: rotate(-8deg) scale(1.1) translate(-2%,-4%); }
+    }
+
+    /* ── PARTICLE CANVAS ── */
+    #hero-canvas {
+        position: absolute; inset: 0;
+        width: 100%; height: 100%;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 1.5s ease 0.6s;
+    }
+    #hero-canvas.ready { opacity: 1; }
+
+    .hero-grid {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(0,255,136,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,255,136,0.04) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+        -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 100%);
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        max-width: 860px;
+        width: 100%;
+    }
+
+    .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 20px;
+        background: rgba(0,255,136,0.08);
+        border: 1px solid rgba(0,255,136,0.25);
+        border-radius: 50px;
+        font-family: var(--font-display);
+        font-size: 0.7rem;
+        letter-spacing: 0.25em;
+        color: var(--green-bright);
+        margin-bottom: 2rem;
+        animation: fadeInDown 0.8s ease both;
+    }
+    .hero-badge::before {
+        content: '';
+        width: 6px; height: 6px;
+        background: var(--green-bright);
+        border-radius: 50%;
+        box-shadow: 0 0 8px var(--green-bright);
+        animation: pulse 2s ease infinite;
+        flex-shrink: 0;
+    }
+    @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.6); } }
+
+    .hero-title {
+        font-family: var(--font-display);
+        font-size: clamp(2.4rem, 7.5vw, 5.8rem);
+        font-weight: 900;
+        line-height: 1.05;
+        margin-bottom: 1rem;
+        animation: fadeInUp 0.9s ease 0.1s both;
+    }
+    .hero-title .line1 {
+        display: block;
+        background: linear-gradient(135deg, var(--text-primary), var(--green-bright));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .hero-title .line2 {
+        display: block;
+        background: linear-gradient(135deg, var(--green-bright), var(--teal));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 0.55em;
+        letter-spacing: 0.12em;
+        margin-top: 0.25em;
+    }
+
+    .hero-slogan {
+        font-family: var(--font-display);
+        font-size: clamp(0.6rem, 1.8vw, 0.85rem);
+        letter-spacing: 0.35em;
+        color: var(--green-bright);
+        opacity: 0.7;
+        margin-bottom: 1.5rem;
+        animation: fadeInUp 0.9s ease 0.2s both;
+    }
+
+    .hero-desc {
+        font-size: clamp(0.95rem, 2.2vw, 1.1rem);
+        color: var(--text-muted);
+        max-width: 580px;
+        margin: 0 auto 2.5rem;
+        animation: fadeInUp 0.9s ease 0.3s both;
+        line-height: 1.85;
+    }
+
+    .hero-cta {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        animation: fadeInUp 0.9s ease 0.4s both;
+    }
+
+    /* ── SCROLL INDICATOR – lives OUTSIDE hero, so no overlap ── */
+    .hero-scroll {
+        position: absolute;
+        /* anchored to bottom of .hero, but rendered in the hero-wrapper stacking context */
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding-bottom: 1.5rem;
+        color: var(--text-muted);
+        font-size: 0.65rem;
+        letter-spacing: 0.25em;
+        font-family: var(--font-display);
+        animation: fadeIn 1s ease 1.2s both;
+        pointer-events: none;
+        /* no overlap with buttons because hero has bottom padding: 7rem */
+    }
+    .scroll-line {
+        width: 1px; height: 44px;
+        background: linear-gradient(var(--green-bright), transparent);
+        animation: scrollPulse 2s ease-in-out infinite;
+    }
+    @keyframes scrollPulse {
+        0%,100% { transform: scaleY(1); opacity: 0.9; }
+        50%      { transform: scaleY(0.4); opacity: 0.3; }
+    }
+
+    @keyframes fadeInDown { from { opacity:0; transform:translateY(-20px); } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeInUp   { from { opacity:0; transform:translateY(30px);  } to { opacity:1; transform:translateY(0); } }
+    @keyframes fadeIn     { from { opacity:0; }                              to { opacity:1; } }
+
+    /* ── SECTIONS ── */
+    .section { padding: 7rem 0; }
+    .section-header { margin-bottom: 3.5rem; }
+
+    /* ── ABOUT ── */
+    .about-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4rem;
+        align-items: center;
+    }
+    .about-text p {
+        color: var(--text-muted);
+        line-height: 1.9;
+        margin-bottom: 1.2rem;
+        font-size: 1rem;
+    }
+
+    .about-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+    }
+    .stat-card {
+        padding: 1.75rem 1.5rem;
+        border-radius: 20px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        text-align: center;
+        transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+        will-change: transform;
+    }
+    .stat-card:hover {
+        border-color: rgba(0,255,136,0.5);
+        box-shadow: 0 0 28px var(--green-glow);
+        transform: translateY(-4px);
+    }
+    .stat-number {
+        font-family: var(--font-display);
+        font-size: clamp(1.8rem, 4vw, 2.5rem);
+        font-weight: 900;
+        color: var(--green-bright);
+        line-height: 1;
+        display: block;
+    }
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.82rem;
+        margin-top: 0.5rem;
+    }
+
+    /* ── TEAM ── */
+    #team { scroll-margin-top: var(--nav-height); }
+
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+        margin-top: 3rem;
+    }
+    .team-card {
+        padding: 2.25rem 1.75rem;
+        border-radius: 24px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        text-align: center;
+        transition: border-color 0.35s, box-shadow 0.35s, transform 0.35s;
+        position: relative;
+        overflow: hidden;
+        will-change: transform;
+    }
+    .team-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 50%; right: 50%;
+        height: 2px;
+        background: linear-gradient(90deg, transparent, var(--green-bright), transparent);
+        transition: left 0.4s ease, right 0.4s ease;
+    }
+    .team-card:hover::before { left: 0; right: 0; }
+    .team-card:hover {
+        border-color: rgba(0,255,136,0.35);
+        transform: translateY(-6px);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.4), 0 0 35px var(--green-glow);
+    }
+
+    .team-avatar {
+        width: 86px; height: 86px;
+        border-radius: 50%;
+        margin: 0 auto 1.2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--green-dark), rgba(0,255,136,0.25));
+        border: 2px solid rgba(0,255,136,0.6);
+        box-shadow: 0 0 18px var(--green-glow);
+        color: var(--green-bright);
+        overflow: hidden;
+    }
+    .team-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .team-name {
+        font-family: var(--font-display);
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.35rem;
+    }
+    .team-role {
+        font-size: 0.82rem;
+        color: var(--green-bright);
+        font-weight: 500;
+        margin-bottom: 1rem;
+        opacity: 0.85;
+    }
+    .team-bio {
+        color: var(--text-muted);
+        font-size: 0.88rem;
+        line-height: 1.7;
+    }
+
+    /* ── FAQ ── */
+    #faq { scroll-margin-top: var(--nav-height); }
+
+    .faq-list {
+        max-width: 780px;
+        margin: 3rem auto 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+    }
+    .faq-item {
+        border-radius: 16px;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        overflow: hidden;
+        transition: border-color 0.3s, box-shadow 0.3s;
+    }
+    .faq-item.open {
+        border-color: rgba(0,255,136,0.4);
+        box-shadow: 0 0 20px var(--green-glow);
+    }
+    .faq-question {
+        width: 100%;
+        padding: 1.2rem 1.5rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start; /* key fix: align top so icon doesn't jump with multi-line text */
+        gap: 1rem;
+        text-align: left;
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-weight: 600;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        transition: color 0.25s;
+        -webkit-tap-highlight-color: transparent;
+    }
+    .faq-question:hover { color: var(--green-bright); }
+    .faq-item.open .faq-question { color: var(--green-bright); }
+
+    .faq-question-text { flex: 1; }
+
+    .faq-icon {
+        width: 26px; height: 26px;
+        border-radius: 8px;
+        background: rgba(0,255,136,0.1);
+        border: 1px solid var(--glass-border);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+        font-weight: 400;
+        line-height: 1;
+        transition: transform 0.3s ease, background 0.3s;
+        color: var(--green-bright);
+        margin-top: 2px; /* optically align with first text line */
+    }
+    .faq-item.open .faq-icon {
+        transform: rotate(45deg);
+        background: rgba(0,255,136,0.18);
+    }
+    .faq-answer {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .faq-answer-inner {
+        padding: 0 1.5rem 1.35rem;
+        color: var(--text-muted);
+        line-height: 1.8;
+        font-size: 0.93rem;
+    }
+    .faq-item.open .faq-answer { max-height: 600px; }
+
+    /* ── BLOG PREVIEW ── */
+    .blog-preview-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        flex-wrap: wrap;
+        gap: 1rem;
+        margin-bottom: 3rem;
+    }
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+    .blog-card {
+        border-radius: 22px;
+        overflow: hidden;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        backdrop-filter: var(--glass-blur);
+        -webkit-backdrop-filter: var(--glass-blur);
+        text-decoration: none;
+        display: flex;
+        flex-direction: column;
+        transition: border-color 0.35s, transform 0.35s, box-shadow 0.35s;
+        will-change: transform;
+    }
+    .blog-card:hover {
+        border-color: rgba(0,255,136,0.4);
+        transform: translateY(-6px);
+        box-shadow: 0 18px 50px rgba(0,0,0,0.45), 0 0 28px var(--green-glow);
+    }
+    .blog-card-img {
+        height: 190px;
+        background: var(--green-dark);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+    .blog-card-img img {
+        width: 100%; height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transition: transform 0.5s ease, filter 0.5s ease;
+        filter: saturate(0.75) brightness(0.88);
+    }
+    .blog-card:hover .blog-card-img img {
+        transform: scale(1.06);
+        filter: saturate(1) brightness(0.92);
+    }
+    .blog-card-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .blog-card-cat {
+        font-family: var(--font-display);
+        font-size: 0.62rem;
+        letter-spacing: 0.22em;
+        color: var(--green-bright);
+        margin-bottom: 0.6rem;
+        display: block;
+        opacity: 0.9;
+    }
+    .blog-card-title {
+        font-family: var(--font-display);
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        line-height: 1.4;
+        margin-bottom: 0.65rem;
+        transition: color 0.25s;
+    }
+    .blog-card:hover .blog-card-title { color: var(--green-bright); }
+    .blog-card-excerpt {
+        color: var(--text-muted);
+        font-size: 0.87rem;
+        line-height: 1.7;
+        flex: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+    .blog-card-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 1.1rem;
+        padding-top: 1.1rem;
+        border-top: 1px solid rgba(0,255,136,0.1);
+        font-size: 0.78rem;
+        color: var(--text-muted);
+    }
+    .blog-arrow {
+        color: var(--green-bright);
+        transition: transform 0.25s;
+    }
+    .blog-card:hover .blog-arrow { transform: translateX(5px); }
+
+    /* ──────────────────────────────
+       RESPONSIVE
+    ────────────────────────────── */
+    @media (max-width: 1024px) {
+        .team-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .blog-grid  { grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); }
+    }
+
+    @media (max-width: 860px) {
+        .about-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    }
+
+    @media (max-width: 640px) {
+        .section { padding: 4rem 0; }
+        .hero { padding: calc(var(--nav-height) + 2rem) 1.25rem 6rem; }
+        .hero-badge { font-size: 0.6rem; letter-spacing: 0.15em; padding: 7px 15px; margin-bottom: 1.5rem; }
+        .hero-slogan { letter-spacing: 0.2em; }
+        .hero-desc { font-size: 0.93rem; }
+        .hero-cta { gap: 0.75rem; }
+
+        .about-stats { gap: 0.85rem; }
+        .stat-card { padding: 1.25rem 1rem; }
+
+        .team-grid { grid-template-columns: 1fr; max-width: 360px; margin-left: auto; margin-right: auto; }
+        .blog-grid { grid-template-columns: 1fr; }
+        .blog-preview-header { flex-direction: column; align-items: flex-start; }
+
+        .faq-question { padding: 1rem 1.1rem; font-size: 0.9rem; }
+        .faq-answer-inner { padding: 0 1.1rem 1.1rem; }
+    }
+
+    @media (max-width: 420px) {
+        .hero-scroll { display: none; }
+        .hero-cta { flex-direction: column; align-items: stretch; }
+        .hero-cta .btn-primary,
+        .hero-cta .btn-ghost { text-align: center; justify-content: center; }
+        .about-stats { grid-template-columns: 1fr 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO (wrapper needed so scroll indicator is outside overflow context) -->
+<div class="hero-wrapper">
+    <section class="hero" id="home">
+        <div class="hero-bg">
+            <div class="hero-aurora">
+                <div class="aurora-layer aurora-layer-1"></div>
+                <div class="aurora-layer aurora-layer-2"></div>
+                <div class="aurora-layer aurora-layer-3"></div>
+            </div>
+            <canvas id="hero-canvas"></canvas>
+        </div>
+        <div class="hero-grid"></div>
+        <div class="hero-content">
+            <div class="hero-badge">GAME STUDIO</div>
+            <h1 class="hero-title">
+                <span class="line1">TRC PRODUCTION</span>
+                <span class="line1">STUDIOS</span>
+                <span class="line2">Inspiration. Innovation. Production.</span>
+            </h1>
+            <p class="hero-slogan">CREATING WORLDS BEYOND IMAGINATION</p>
+            <p class="hero-desc">We are an independent game studio driven to create extraordinary interactive experiences – from the very first idea to the finished product.</p>
+            <div class="hero-cta">
+                <a href="/blog" class="btn-primary">→ Our DevLogs</a>
+                <a href="#team" class="btn-ghost">The Team</a>
+            </div>
+        </div>
+
+        <!-- Scroll indicator is INSIDE .hero but hero has no overflow:hidden,
+             and enough bottom padding (7rem) that it never touches the buttons -->
+        <div class="hero-scroll" aria-hidden="true">
+            <span>SCROLL</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+</div>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+    <div class="container">
+        <div class="about-grid">
+            <div class="about-text reveal-left">
+                <span class="section-label">About Us</span>
+                <h2 class="section-title" style="margin-bottom:1.4rem">Where Ideas Become<br>Worlds</h2>
+                <p>TRC Production Studios stands for uncompromising quality in game development. Our team of passionate developers, designers, and creatives brings a unique vision to every project.</p>
+                <p>We believe great games are more than entertainment – they are works of art that evoke emotions, tell stories, and create lasting memories.</p>
+                <div style="margin-top:2rem;">
+                    <a href="#team" class="btn-ghost">Meet the Team</a>
+                </div>
+            </div>
+            <div class="about-stats reveal-right">
+                <div class="stat-card reveal" data-delay="0">
+                    <span class="stat-number">∞</span>
+                    <p class="stat-label">Creative Ideas</p>
+                </div>
+                <div class="stat-card reveal" data-delay="100">
+                    <span class="stat-number">100%</span>
+                    <p class="stat-label">Passion</p>
+                </div>
+                <div class="stat-card reveal" data-delay="200">
+                    <span class="stat-number">24/7</span>
+                    <p class="stat-label">Development</p>
+                </div>
+                <div class="stat-card reveal" data-delay="300">
+                    <span class="stat-number">1</span>
+                    <p class="stat-label">Vision</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- TEAM -->
+<section class="section" id="team">
+    <div class="container">
+        <div class="section-header reveal" style="text-align:center">
+            <span class="section-label">The Team</span>
+            <h2 class="section-title">The Minds Behind It</h2>
+        </div>
+        <div class="team-grid">
+            <div class="team-card reveal" data-delay="0">
+                <div class="team-avatar">TRC</div>
+                <h3 class="team-name">TheROcraft</h3>
+                <p class="team-role">Founder</p>
+                <p class="team-bio">Im TheROcraft the founder of TRC Production Studios. I love to code and design things :)</p>
+            </div>
+            <div class="team-card reveal" data-delay="120">
+                <div class="team-avatar">TLC</div>
+                <h3 class="team-name">TheLeoCraft</h3>
+                <p class="team-role">Co-Founder</p>
+                <p class="team-bio">No Bio yet :(</p>
+            </div>
+            <div class="team-card reveal" data-delay="240">
+                <div class="team-avatar">TRCL</div>
+                <h3 class="team-name">TRC Loop</h3>
+                <p class="team-role">Main Developer & partner</p>
+                <p class="team-bio">No Bio yet :(</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- FAQ -->
+<section class="section" id="faq">
+    <div class="container">
+        <div class="section-header reveal" style="text-align:center">
+            <span class="section-label">FAQ</span>
+            <h2 class="section-title">Frequently Asked Questions</h2>
+        </div>
+        <div class="faq-list">
+
+            <div class="faq-item reveal" data-delay="0">
+                <button class="faq-question" aria-expanded="false">
+                    <span class="faq-question-text">What does TRC Production Studios develop?</span>
+                    <span class="faq-icon" aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" role="region">
+                    <div class="faq-answer-inner">TRC Production Studios develops roblox games and assets.</div>
+                </div>
+            </div>
+
+            <div class="faq-item reveal" data-delay="80">
+                <button class="faq-question" aria-expanded="false">
+                    <span class="faq-question-text">How can I get in touch with the studio?</span>
+                    <span class="faq-icon" aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" role="region">
+                    <div class="faq-answer-inner">You can reach us via email at <a href="mailto:info@trc-production-studios.com" style="color:var(--green-bright)">info@trc-production-studios.com</a>. For business inquiries and collaborations, please indicate this in the subject line. We typically respond within 2–3 business days.</div>
+                </div>
+            </div>
+
+            <div class="faq-item reveal" data-delay="320">
+                <button class="faq-question" aria-expanded="false">
+                    <span class="faq-question-text">What platforms will your games be on?</span>
+                    <span class="faq-icon" aria-hidden="true">+</span>
+                </button>
+                <div class="faq-answer" role="region">
+                    <div class="faq-answer-inner">Our primary focus is initially on the game plattform Roblox. Depending on success and community feedback, we plan to port our titles to consoles and PC as well. We believe great games should be playable on as many platforms as possible.</div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- BLOG PREVIEW -->
+{% if posts %}
+<section class="section">
+    <div class="container">
+        <div class="blog-preview-header reveal">
+            <div>
+                <span class="section-label">Blog</span>
+                <h2 class="section-title">Latest Entries</h2>
+            </div>
+            <a href="/blog" class="btn-ghost" style="flex-shrink:0">View all →</a>
+        </div>
+        <div class="blog-grid">
+            {% for post in posts %}
+            <a href="/blog/{{ post.slug }}" class="blog-card reveal" data-delay="{{ loop.index0 * 120 }}">
+                <div class="blog-card-img">
+                    <img src="{{ post.header_image }}" alt="{{ post.title }}" loading="lazy">
+                </div>
+                <div class="blog-card-body">
+                    <span class="blog-card-cat">{{ post.category }}</span>
+                    <h3 class="blog-card-title">{{ post.title }}</h3>
+                    <p class="blog-card-excerpt">{{ post.excerpt }}</p>
+                    <div class="blog-card-footer">
+                        <span>{{ post.date }} · {{ post.author }}</span>
+                        <span class="blog-arrow">→</span>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    /* ── FAQ ACCORDION ── */
+    document.querySelectorAll('.faq-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const item = btn.closest('.faq-item');
+            const isOpen = item.classList.contains('open');
+            document.querySelectorAll('.faq-item').forEach(i => {
+                i.classList.remove('open');
+                i.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
+            });
+            if (!isOpen) {
+                item.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+            }
+        });
+    });
+
+    /* ── SMOOTH SCROLL ── */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+            const target = document.querySelector(a.getAttribute('href'));
+            if (!target) return;
+            e.preventDefault();
+            const navH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--nav-height'));
+            window.scrollTo({ top: target.getBoundingClientRect().top + window.scrollY - navH - 8, behavior: 'smooth' });
+        });
+    });
+
+    /* ────────────────────────────────────────────
+       PARTICLE CANVAS – floating neon dots
+    ──────────────────────────────────────────── */
+    (function () {
+        const canvas = document.getElementById('hero-canvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        function resize() {
+            canvas.width  = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+        }
+        resize();
+        window.addEventListener('resize', resize, { passive: true });
+
+        const COUNT  = window.innerWidth < 600 ? 38 : 68;
+        const COLORS = ['rgba(0,255,136,', 'rgba(0,229,200,', 'rgba(0,200,83,'];
+
+        const pts = Array.from({ length: COUNT }, () => ({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            r: Math.random() * 1.5 + 0.4,
+            vx: (Math.random() - 0.5) * 0.25,
+            vy: (Math.random() - 0.5) * 0.25,
+            a: Math.random() * 0.5 + 0.1,
+            aDir: Math.random() > 0.5 ? 1 : -1,
+            aSpd: Math.random() * 0.004 + 0.001,
+            col: COLORS[Math.floor(Math.random() * COLORS.length)],
+        }));
+
+        const MAX_D = 130;
+
+        function tick() {
+            canvas.width  = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            for (const p of pts) {
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = canvas.width;
+                if (p.x > canvas.width) p.x = 0;
+                if (p.y < 0) p.y = canvas.height;
+                if (p.y > canvas.height) p.y = 0;
+                p.a += p.aSpd * p.aDir;
+                if (p.a > 0.65 || p.a < 0.08) p.aDir *= -1;
+
+                // glow halo
+                const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r * 5);
+                g.addColorStop(0, p.col + p.a + ')');
+                g.addColorStop(1, p.col + '0)');
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r * 5, 0, Math.PI * 2);
+                ctx.fillStyle = g; ctx.fill();
+
+                // core dot
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                ctx.fillStyle = p.col + (p.a * 0.85) + ')'; ctx.fill();
+            }
+
+            // connections
+            for (let i = 0; i < pts.length; i++) {
+                for (let j = i + 1; j < pts.length; j++) {
+                    const a = pts[i], b = pts[j];
+                    const dx = a.x - b.x, dy = a.y - b.y;
+                    const d  = Math.sqrt(dx * dx + dy * dy);
+                    if (d < MAX_D) {
+                        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+                        ctx.strokeStyle = `rgba(0,255,136,${(1 - d / MAX_D) * 0.15})`;
+                        ctx.lineWidth = 0.5; ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+        tick();
+        setTimeout(() => canvas.classList.add('ready'), 80);
+    })();
+
+    /* ────────────────────────────────────────────
+       INTRO LOGIC
+       - localStorage  "trc_visited"  → persists forever (first real visit)
+       - sessionStorage "trc_welcomed" → per tab (tab splash)
+
+       Rules:
+       1. First EVER visit  → show video intro (localStorage not set)
+          → skip tab splash (don't set sessionStorage yet, set it after video)
+       2. Same tab revisit  → show tab splash (sessionStorage not set)
+       3. New tab / return  → nothing (both keys already set)
+    ──────────────────────────────────────────── */
+    (function () {
+        const VISITED_KEY  = 'trc_visited';   // localStorage
+        const WELCOMED_KEY = 'trc_welcomed';  // sessionStorage
+
+        const isFirstEver = !localStorage.getItem(VISITED_KEY);
+        const isFirstTab  = !sessionStorage.getItem(WELCOMED_KEY);
+
+        /* ── VIDEO INTRO (first real visit only) ── */
+        if (isFirstEver) {
+            localStorage.setItem(VISITED_KEY, '1');
+            sessionStorage.setItem(WELCOMED_KEY, '1'); // skip tab splash after video
+
+            const style = document.createElement('style');
+            style.textContent = `
+                #video-intro {
+                    position: fixed; inset: 0; z-index: 10000;
+                    background: #000;
+                    display: flex; align-items: center; justify-content: center;
+                    transition: opacity 1.1s cubic-bezier(0.4,0,0.2,1);
+                }
+                #video-intro.out { opacity: 0; pointer-events: none; }
+
+                #video-intro video {
+                    width: 100%; height: 100%;
+                    object-fit: cover;
+                    display: block;
+                    /* absolutely no controls, no interaction */
+                    pointer-events: none;
+                    user-select: none;
+                    -webkit-user-select: none;
+                }
+
+                /* Fallback shown if no video file placed */
+                #video-intro .video-fallback {
+                    position: absolute; inset: 0;
+                    display: flex; flex-direction: column;
+                    align-items: center; justify-content: center;
+                    gap: 1.5rem; background: #030a06;
+                }
+                #video-intro .video-fallback img {
+                    width: 100px; height: 100px; object-fit: contain;
+                    filter: drop-shadow(0 0 30px rgba(0,255,136,0.9));
+                    animation: vfLogoIn 1s cubic-bezier(0.34,1.56,0.64,1) 0.2s both;
+                    opacity: 0;
+                }
+                @keyframes vfLogoIn {
+                    from { opacity:0; transform: scale(0.4) rotate(-15deg); }
+                    to   { opacity:1; transform: scale(1) rotate(0); }
+                }
+                #video-intro .video-fallback .vf-title {
+                    font-family: 'Orbitron', monospace;
+                    font-size: clamp(1rem, 4vw, 1.8rem); font-weight: 900;
+                    letter-spacing: 0.12em;
+                    background: linear-gradient(135deg, #e8fff3, #00ff88);
+                    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                    opacity: 0;
+                    animation: vfTxtIn 0.6s ease 0.8s both;
+                }
+                #video-intro .video-fallback .vf-sub {
+                    font-family: 'Orbitron', monospace;
+                    font-size: clamp(0.55rem, 2vw, 0.7rem);
+                    letter-spacing: 0.4em; color: rgba(0,255,136,0.6);
+                    opacity: 0; animation: vfTxtIn 0.6s ease 1s both;
+                }
+                @keyframes vfTxtIn {
+                    from { opacity:0; transform: translateY(10px); }
+                    to   { opacity:1; transform: translateY(0); }
+                }
+                #video-intro .video-fallback .vf-ring {
+                    position: absolute; width: 160px; height: 160px;
+                    border-radius: 50%;
+                    border: 1px solid rgba(0,255,136,0.2);
+                    animation: vfRing 2.5s ease-in-out infinite;
+                }
+                #video-intro .video-fallback .vf-ring-2 {
+                    position: absolute; width: 220px; height: 220px;
+                    border-radius: 50%;
+                    border: 1px solid rgba(0,229,200,0.1);
+                    animation: vfRing 3.5s ease-in-out 0.5s infinite reverse;
+                }
+                @keyframes vfRing {
+                    0%,100%{ transform:scale(1); opacity:0.5; }
+                    50%    { transform:scale(1.15); opacity:0.1; }
+                }
+
+                /* Skip button */
+                #video-intro .skip-btn {
+                    position: absolute; bottom: 2.5rem; right: 2rem;
+                    font-family: 'Orbitron', monospace; font-size: 0.65rem;
+                    letter-spacing: 0.2em; color: rgba(255,255,255,0.4);
+                    cursor: pointer; border: none; background: none;
+                    padding: 10px 16px;
+                    border: 1px solid rgba(255,255,255,0.1); border-radius: 50px;
+                    transition: color 0.3s, border-color 0.3s;
+                    animation: vfTxtIn 0.5s ease 2s both; opacity: 0;
+                }
+                #video-intro .skip-btn:hover {
+                    color: rgba(0,255,136,0.8); border-color: rgba(0,255,136,0.3);
+                }
+            `;
+            document.head.appendChild(style);
+
+            const intro = document.createElement('div');
+            intro.id = 'video-intro';
+
+            // Check if a video file exists – if not, show branded fallback
+            // User should place their video at /static/videos/intro.mp4
+            intro.innerHTML = `
+                <video
+                    id="intro-video"
+                    autoplay
+                    muted
+                    playsinline
+                    disablePictureInPicture
+                    disableRemotePlayback
+                    preload="auto"
+                    tabindex="-1">
+                    <source src="/static/videos/intro.mp4" type="video/mp4">
+                    <source src="/static/videos/intro.webm" type="video/webm">
+                </video>
+
+                <!-- Shown if video cannot load (no file placed yet) -->
+                <div class="video-fallback" id="video-fallback" style="display:none">
+                    <div class="vf-ring"></div>
+                    <div class="vf-ring-2"></div>
+                    <img src="/static/images/logo.png" alt="TRC">
+                    <p class="vf-title">TRC PRODUCTION STUDIOS</p>
+                    <p class="vf-sub">INSPIRATION · INNOVATION · PRODUCTION</p>
+                </div>
+
+                <button class="skip-btn" id="intro-skip" aria-label="Skip intro">SKIP ›</button>
+            `;
+            document.body.appendChild(intro);
+
+            function dismissIntro() {
+                intro.classList.add('out');
+                // Tell typewriter the intro is done
+                window.dispatchEvent(new Event('trc-intro-done'));
+                setTimeout(() => intro.remove(), 1150);
+            }
+
+            const vid = document.getElementById('intro-video');
+            const fallback = document.getElementById('video-fallback');
+
+            // If video fails to load or has no sources → show fallback for 4s
+            vid.addEventListener('error', showFallback);
+            vid.addEventListener('emptied', showFallback);
+
+            function showFallback() {
+                vid.style.display = 'none';
+                fallback.style.display = 'flex';
+                setTimeout(dismissIntro, 4000);
+            }
+
+            // Dismiss when video ends
+            vid.addEventListener('ended', dismissIntro);
+
+            // Safety: if video stalls for > 10s, dismiss anyway
+            const safetyTimer = setTimeout(dismissIntro, 30000);
+            vid.addEventListener('ended', () => clearTimeout(safetyTimer));
+
+            // Skip button
+            document.getElementById('intro-skip').addEventListener('click', dismissIntro);
+
+            // Check if video actually has a valid source
+            vid.addEventListener('loadedmetadata', () => {
+                // Valid video – hide fallback (already hidden by default)
+                fallback.style.display = 'none';
+            });
+
+            // If no src loads within 2.5s, assume no file → show fallback
+            const fallbackTimer = setTimeout(() => {
+                if (vid.readyState === 0) showFallback();
+            }, 2500);
+            vid.addEventListener('loadeddata', () => clearTimeout(fallbackTimer));
+
+        /* ── TAB SPLASH (subsequent tabs, same session) ── */
+        } else if (isFirstTab) {
+            sessionStorage.setItem(WELCOMED_KEY, '1');
+
+            const style = document.createElement('style');
+            style.textContent = `
+                #welcome-splash {
+                    position: fixed; inset: 0; z-index: 9999;
+                    background: #030a06;
+                    display: flex; align-items: center; justify-content: center;
+                    transition: opacity 0.85s cubic-bezier(0.4,0,0.2,1);
+                }
+                #welcome-splash.out { opacity: 0; pointer-events: none; }
+                .spl-inner { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 1.1rem; }
+                .spl-ring-wrap { position: relative; width: 120px; height: 120px; display: flex; align-items: center; justify-content: center; }
+                .spl-logo {
+                    width: 82px; height: 82px; object-fit: contain; position: relative; z-index: 1;
+                    filter: drop-shadow(0 0 22px rgba(0,255,136,0.85));
+                    opacity: 0; animation: splIn 0.75s cubic-bezier(0.34,1.56,0.64,1) 0.15s forwards;
+                }
+                .spl-ring { position: absolute; inset: 0; border-radius: 50%; border: 1px solid rgba(0,255,136,0.3); animation: splRing 2s ease-in-out infinite; }
+                .spl-ring-2 { position: absolute; inset: -12px; border-radius: 50%; border: 1px solid rgba(0,229,200,0.15); animation: splRing 2.8s ease-in-out 0.4s infinite reverse; }
+                @keyframes splRing { 0%,100%{transform:scale(1);opacity:.5} 50%{transform:scale(1.2);opacity:.1} }
+                @keyframes splIn { from{opacity:0;transform:scale(.45) rotate(-12deg)} to{opacity:1;transform:scale(1) rotate(0)} }
+                .spl-welcome { font-family:'Orbitron',monospace; font-size:clamp(.6rem,2.5vw,.75rem); letter-spacing:.5em; color:rgba(0,255,136,.65); opacity:0; animation:splTxt .55s ease .55s forwards; }
+                .spl-name { font-family:'Orbitron',monospace; font-size:clamp(.85rem,3.5vw,1.35rem); font-weight:800; letter-spacing:.1em; background:linear-gradient(135deg,#e8fff3,#00ff88); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; opacity:0; animation:splTxt .55s ease .72s forwards; }
+                @keyframes splTxt { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+                .spl-bar { width:clamp(150px,38vw,230px); height:2px; background:rgba(0,255,136,.1); border-radius:2px; overflow:hidden; margin-top:.4rem; }
+                .spl-bar-fill { height:100%; width:0%; background:linear-gradient(90deg,#00ff88,#00e5c8); box-shadow:0 0 10px rgba(0,255,136,.7); border-radius:2px; animation:splBar 1.5s cubic-bezier(.4,0,.2,1) .85s forwards; }
+                @keyframes splBar { from{width:0%} to{width:100%} }
+            `;
+            document.head.appendChild(style);
+
+            const splash = document.createElement('div');
+            splash.id = 'welcome-splash';
+            splash.innerHTML = `
+                <div class="spl-inner">
+                    <div class="spl-ring-wrap">
+                        <div class="spl-ring"></div>
+                        <div class="spl-ring-2"></div>
+                        <img class="spl-logo" src="/static/images/logo.png" alt="TRC">
+                    </div>
+                    <p class="spl-welcome">WELCOME</p>
+                    <p class="spl-name">TRC PRODUCTION STUDIOS</p>
+                    <div class="spl-bar"><div class="spl-bar-fill"></div></div>
+                </div>`;
+            document.body.appendChild(splash);
+
+            setTimeout(() => {
+                splash.classList.add('out');
+                setTimeout(() => splash.remove(), 900);
+            }, 2650);
+        }
+    })();
+</script>
+{% endblock %}
+
