@@ -29,4 +29,4 @@ def impressum_redirect():
     return redirect('/imprint', code=301)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=False)
