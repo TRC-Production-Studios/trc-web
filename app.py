@@ -1,7 +1,14 @@
-from flask import Flask, render_template, abort
+from flask import Flask, render_template, abort, jsonify
 from blog_posts import BLOG_POSTS
 
 app = Flask(__name__)
+
+# ── VERSION – beim Deploy hochzählen, z.B. v4.0.2, v4.0.3 ...
+APP_VERSION = "v4.0.1"
+
+@app.route('/version')
+def version():
+    return jsonify({"version": APP_VERSION})
 
 @app.route('/')
 def index():
@@ -29,4 +36,4 @@ def impressum_redirect():
     return redirect('/imprint', code=301)
 
 if __name__ == '__main__':
-    app.run(debug=False)
+    app.run(debug=True)
